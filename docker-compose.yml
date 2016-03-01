@@ -1,0 +1,13 @@
+  mongo:
+    image: mongo
+    container_name: mongo
+  web:
+    build: webserver
+    links:
+      - mongo
+    ports:
+      - "80:5000"
+  script:
+    build: script
+    links:
+      - mongo
