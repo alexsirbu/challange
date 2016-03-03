@@ -9,8 +9,7 @@ app = Flask(__name__)
 
 def subreddit_get_submissions(subreddit_name, mongoDB, from_timestamp, to_timestamp):
      cursor = mongoDB[subreddit_name+"_submissions"].find({
-         "submission_timestamp" : {"$gt" : from_timestamp-1}, 
-         "submission_timestamp" : {"$lt" : to_timestamp+1}
+         "submission_timestamp" : {"$gt" : from_timestamp-1, "$lt" : to_timestamp+1} 
      })
      submissions = []
      for submission in cursor:
@@ -23,8 +22,7 @@ def subreddit_get_submissions(subreddit_name, mongoDB, from_timestamp, to_timest
 
 def subreddit_get_comments(subreddit_name, mongoDB, from_timestamp, to_timestamp):
      cursor = mongoDB[subreddit_name+"_comments"].find({
-         "comment_timestamp" : {"$gt" : from_timestamp-1},
-         "comment_timestamp" : {"$lt" : to_timestamp+1}
+         "comment_timestamp" : {"$gt" : from_timestamp-1, "$lt" : to_timestamp+1}
      })
      comments = []
      for comment in cursor:
