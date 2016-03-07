@@ -10,7 +10,10 @@ def treat_subreddit_submissions(subreddit_name, subreddit, mongoDB, old_timestam
      submissions = subreddit.get_new(limit=None)
      subreddit_submissions_db = mongoDB[subreddit_name+"_submissions"]
      while True:
-         submission = submissions.next()
+         try:
+             submission = submissions.next()
+         except StopIteration:
+             break
 
          if submission.created_utc >= new_timestamp:
              continue
@@ -30,7 +33,10 @@ def treat_subreddit_comments(subreddit_name, subreddit, mongoDB, old_timestamp, 
      comments = subreddit.get_comments(limit=None)
      subreddit_comments_db = mongoDB[subreddit_name+"_comments"]
      while True:
-         comment = comments.next()
+         try:
+             comment = comments.next()
+         except StopIteration:
+             break
 
          # these comments will be processed in the next batch
          if comment.created_utc >= new_timestamp:
