@@ -60,8 +60,19 @@ def get_current_timestamp():
 def create_indexes_for_subreddit(subreddit_name, mongoDB):
      subreddit_comments_db = mongoDB[subreddit_name+"_comments"]
      subreddit_submissions_db = mongoDB[subreddit_name+"_submissions"]
-     subreddit_comments_db.create_index([("comment_timestamp", pymongo.DESCENDING)])
-     subreddit_submissions_db.create_index([("submission_timestamp", pymongo.DESCENDING)])
+     subreddit_comments_db.create_index([
+         ("comment_timestamp", pymongo.DESCENDING),
+         ("comment_body", pymongo.TEXT)
+     ], name="comment_search_index")
+     subreddit_submissions_db.create_index([
+         ("submission_timestamp", pymongo.DESCENDING),
+         ("submission_title", pymongo.TEXT)
+     ], name="submission_search_index")
+
+def initialize_database(subreddits, mongoDB, mongoClient):
+     mongoClient.admin.command("setParameter", textSearchEnabled=True)
+     for subreddit in subreddits:
+         create_indexes_for_subreddit(subreddit, mongoDB)
 
 def loop(client):
      while True:
@@ -79,8 +90,7 @@ def run():
      redditClient = praw.Reddit(user_agent="Test Script")     
      mongoClient = MongoClient(os.environ["MONGO_PORT_27017_TCP_ADDR"], 27017)
      mongoDB = mongoClient.challange
-     for subreddit in subreddits:
-         create_indexes_for_subreddit(subreddit, mongoDB)
+     initialize_database(subreddits, mongoDB, mongoClient)
      old_timestamp = get_current_timestamp()
      while True:
          time.sleep(30)
