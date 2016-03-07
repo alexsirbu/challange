@@ -57,6 +57,12 @@ def get_current_timestamp():
      current_timestamp = (current_date - datetime.datetime(1970,1,1)).total_seconds()
      return current_timestamp
 
+def create_indexes_for_subreddit(subreddit_name, mongoDB):
+     subreddit_comments_db = mongoDB[subreddit_name+"_comments"]
+     subreddit_submissions_db = mongoDB[subreddit_name+"_submissions"]
+     subreddit_comments_db.create_index([("comment_timestamp", pymongo.DESCENDING)])
+     subreddit_submissions_db.create_index([("submission_timestamp", pymongo.DESCENDING)])
+
 def loop(client):
      while True:
          db = client.test_database
@@ -73,6 +79,8 @@ def run():
      redditClient = praw.Reddit(user_agent="Test Script")     
      mongoClient = MongoClient(os.environ["MONGO_PORT_27017_TCP_ADDR"], 27017)
      mongoDB = mongoClient.challange
+     for subreddit in subreddits:
+         create_indexes_for_subreddit(subreddit, mongoDB)
      old_timestamp = get_current_timestamp()
      while True:
          time.sleep(30)
