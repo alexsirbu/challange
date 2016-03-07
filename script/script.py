@@ -61,12 +61,12 @@ def create_indexes_for_subreddit(subreddit_name, mongoDB):
      subreddit_comments_db = mongoDB[subreddit_name+"_comments"]
      subreddit_submissions_db = mongoDB[subreddit_name+"_submissions"]
      subreddit_comments_db.create_index([
-         ("comment_timestamp", pymongo.DESCENDING),
-         ("comment_body", pymongo.TEXT)
+         ("comment_body", pymongo.TEXT),
+         ("comment_timestamp", pymongo.DESCENDING)
      ], name="comment_search_index")
      subreddit_submissions_db.create_index([
-         ("submission_timestamp", pymongo.DESCENDING),
-         ("submission_title", pymongo.TEXT)
+         ("submission_title", pymongo.TEXT),
+         ("submission_timestamp", pymongo.DESCENDING)
      ], name="submission_search_index")
 
 def initialize_database(subreddits, mongoDB, mongoClient):

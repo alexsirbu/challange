@@ -21,6 +21,22 @@ def subreddit_get_submissions(subreddit_name, mongoDB, from_timestamp, to_timest
      return submissions
      
 
+def subreddit_get_submissions_keyword(subreddit_name, mongoDB, from_timestamp, to_timestamp, keyword):
+     cursor = mongoDB[subreddit_name+"_submissions"].find({
+         "$text":{"$search":keyword},
+         "submission_timestamp" : {"$gt" : from_timestamp-1, "$lt" : to_timestamp+1}
+     })
+     cursor.sort([("submission_timestamp", pymongo.DESCENDING)])
+     submissions = []
+     for submission in cursor:
+         submissions.append({
+             "submission_timestamp" : submission["submission_timestamp"],
+             "submission_title" : submission["submission_title"]
+         })
+     return submissions
+
+
+
 def subreddit_get_comments(subreddit_name, mongoDB, from_timestamp, to_timestamp):
      cursor = mongoDB[subreddit_name+"_comments"].find({
          "comment_timestamp" : {"$gt" : from_timestamp-1, "$lt" : to_timestamp+1}
@@ -33,7 +49,23 @@ def subreddit_get_comments(subreddit_name, mongoDB, from_timestamp, to_timestamp
              "comment_body" : comment["comment_body"]
          })
      return comments
+
      
+def subreddit_get_comments_keyword(subreddit_name, mongoDB, from_timestamp, to_timestamp, keyword):
+     cursor = mongoDB[subreddit_name+"_comments"].find({
+         "$text":{"$search":keyword},
+         "comment_timestamp" : {"$gt" : from_timestamp-1, "$lt" : to_timestamp+1}
+     })
+     cursor.sort([("comment_timestamp", pymongo.DESCENDING)])
+     comments = []
+     for comment in cursor:
+         comments.append({
+             "comment_timestamp" : comment["comment_timestamp"],
+             "comment_body" : comment["comment_body"]
+         })
+     return comments
+
+
 
 @app.route("/items/")
 def hello():
@@ -47,10 +79,18 @@ def hello():
 
      mongoClient = MongoClient(os.environ["MONGO_PORT_27017_TCP_ADDR"], 27017)
      mongoDB = mongoClient.challange
-     response = {
-         "submissions" : subreddit_get_submissions(subreddit_name, mongoDB, from_timestamp, to_timestamp),
-         "comments" : subreddit_get_comments(subreddit_name, mongoDB, from_timestamp, to_timestamp)
-     }
+
+     if (not args.has_key("keyword")):
+         response = {
+             "submissions" : subreddit_get_submissions(subreddit_name, mongoDB, from_timestamp, to_timestamp),
+             "comments" : subreddit_get_comments(subreddit_name, mongoDB, from_timestamp, to_timestamp)
+         }
+     else:
+         keyword = args.get("keyword")
+         response = {
+             "submissions" : subreddit_get_submissions_keyword(subreddit_name, mongoDB, from_timestamp, to_timestamp, keyword),
+             "comments" : subreddit_get_comments_keyword(subreddit_name, mongoDB, from_timestamp, to_timestamp, keyword)
+         }
      return json.dumps(response)
 
 if not app.debug:
