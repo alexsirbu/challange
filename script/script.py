@@ -107,4 +107,5 @@ def run():
          old_timestamp = new_timestamp
          print "Processed all subreddits, going to sleep"
 
-run()
+if __name__ == '__main__':
+     run()
